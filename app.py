@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-13 17:57:37
+@LastEditTime: 2019-11-20 14:50:33
 '''
 import logging
 import logging.config
@@ -57,14 +57,13 @@ class RouteHandler(object):
             自动注册路由的方式可以继承 application实现
             我这边是想实现像flask蓝本一样实现注册...所以暂时设置为这样
         """
-
         # from handlers import auth
         # from handlers import interface
         # from handlers import menu
         # from handlers import user
         # from handlers import role
         # from handlers import route
-
+        from handlers import adminuser
         from oslo.web.route import route
         self.route = route
         super(RouteHandler, self).__init__()
@@ -75,7 +74,7 @@ class DB(object):
     def __init__(self):
         self.db = mysqlHanlder()
 
-    def rbac_init(self):
+    def db_init(self):
         """初始化rbac数据库"""
         from configs.setting import DB_HOST, BD_ECHO, DB_NAME
         self.db.init(dbname=DB_NAME, dburl=DB_HOST, dbecho=BD_ECHO)
@@ -90,7 +89,7 @@ class Application(tornado.web.Application, RouteHandler):
             cookie_secret=COOKIE_SECRET,
             autoescape=None,
         )
-        DB().rbac_init()
+        DB().db_init()
         RouteHandler.__init__(self)
         tornado.web.Application.__init__(self, self.route.get_urls(),
                                          **configs)

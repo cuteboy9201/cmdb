@@ -4,10 +4,9 @@
 @Author: Youshumin
 @Date: 2019-11-13 11:13:01
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-14 17:51:19
+@LastEditTime: 2019-11-20 12:11:59
 @Description: 
 '''
-RBAC_NAME = "rbac"
-RBAC_DB = "mysql+pymysql://rbac:123456@192.168.2.69:12502/cute_rbac?charset=utf8"
-RBAC_DB_ECHO = True
-ADMIN_LIST = ["youshumin", "superuser"]
+DB_HOST = "mysql+pymysql://rbac:123456@192.168.2.69:12502/cute_rbac?charset=utf8"
+BD_ECHO = True
+DB_NAME = "cmdb"

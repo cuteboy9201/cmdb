@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-10-11 11:24:53
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-19 15:07:08
+@LastEditTime: 2019-11-20 11:39:08
 @Description: 
 '''
 
@@ -13,7 +13,7 @@ import os
 debug = os.environ.get("RUN_ENV")
 
 if debug == "prod":
-    from configs.cfg import RBAC_NAME, RBAC_DB, RBAC_DB_ECHO, ADMIN_LIST
+    from configs.cfg import DB_HOST, BD_ECHO, DB_NAME
 else:
     from configs.dev_cfg import DB_HOST, BD_ECHO, DB_NAME
 
