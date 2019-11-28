@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-20 11:40:07
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-26 10:14:54
+@LastEditTime: 2019-11-27 16:53:02
 @Description: 
 '''
 import datetime
@@ -48,6 +48,10 @@ class MixDbObj:
         item = {key: value}
         db = self.db_obj.filter_by(**item).first()
         return db
+
+    def getAll(self):
+        dbList = self.db_obj.all()
+        return dbList
 
     def __del__(self):
         self.session.close()
@@ -147,6 +151,9 @@ class CmdbAdminUser(MixDbObj):
 
 
 class CmdbHostAuth(MixDbObj):
+    """
+        cmdb_host_auth【资产管理账号关联表】 操作
+    """
     def __init__(self, table=''):
         self.table = ORM.CmdbHostAuth
         super(CmdbHostAuth, self).__init__(self.table)
@@ -166,3 +173,70 @@ class CmdbHostAuth(MixDbObj):
     def getListDataByAuthId(self, authId):
         DB = self.db_obj.filter(self.table.authId == authId).all()
         return DB
+
+
+class CmdbHost(MixDbObj):
+    """ 
+        IT资产表 相关操作
+        post: 添加资产操作
+        getPage: 获取分页资产列表
+        put: 修改数据
+    """
+    def __init__(self, table=''):
+        self.table = ORM.CmdbHost
+        super(CmdbHost, self).__init__(self.table)
+
+    def post(self, authInfo, connectHost, connectPort, desc, env, name):
+        check_name = self.getDbObjByKeyValue("name", name)
+        if check_name:
+            return False, "资产已经存在"
+
+        try:
+            id = create_id()
+            add_data = self.table(name=name,
+                                  authInfo=authInfo,
+                                  connectHost=connectHost,
+                                  connectPort=connectPort,
+                                  desc=desc,
+                                  env=env,
+                                  id=id,
+                                  createTime=datetime.datetime.now(),
+                                  updateTime=datetime.datetime.now())
+            self.session.add(add_data)
+            self.session.commit()
+            return True, id
+        except Exception as e:
+            LOG.warning("{}".format(str(e)))
+            self.session.rollback()
+            return False, ""
+
+    def getPage(self, pageIndex, pageSize, descending, name):
+        reps_list = []
+
+        offset_num = (pageIndex - 1) * pageSize
+        db_obj = self.db_obj
+        if name:
+            db_obj = db_obj.filter(self.table.name == name)
+        db = db_obj.all()
+        totalCount = len(db)
+        get_db = db_obj.limit(pageSize).offset(offset_num).all()
+        return totalCount, get_db
+
+    def put(self, authInfo, connectHost, connectPort, desc, env, name, id):
+        check_id = self.getById(id)
+        if not check_id:
+            return False, "非法操作"
+        try:
+            check_id.name = name
+            check_id.connectHost = connectHost
+            check_id.connectPort = connectPort
+            check_id.desc = desc
+            check_id.authInfo = authInfo
+            check_id.env = env
+            self.session.commit()
+        except Exception as e:
+            LOG.warning("{}".format(str(e)))
+            self.session.rollback()
+            return False, ""
+        return True, ""
+    

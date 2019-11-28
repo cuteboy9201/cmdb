@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-19 14:28:19
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-25 09:48:54
+@LastEditTime: 2019-11-27 14:57:42
 @Description: 
 '''
 from sqlalchemy import Column, DateTime, ForeignKey, String
@@ -40,6 +40,7 @@ class CmdbHost(Base):
 
     id = Column(String(40), primary_key=True)
     name = Column(String(40), nullable=False)
+    authInfo = Column(String(40), nullable=True)
     connectHost = Column(String(40))
     connectPort = Column(INTEGER(5), nullable=False)
     env = Column(String(40))
@@ -50,7 +51,7 @@ class CmdbHost(Base):
     status = Column(TINYINT(1))
     adminuser = Column(String(64))
     createTime = Column(DateTime)
-    upadteTime = Column(DateTime)
+    updateTime = Column(DateTime)
     desc = Column(String(64), nullable=False)
 
 

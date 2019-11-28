@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-20 14:50:33
+@LastEditTime: 2019-11-27 14:20:16
 '''
 import logging
 import logging.config
@@ -64,6 +64,7 @@ class RouteHandler(object):
         # from handlers import role
         # from handlers import route
         from handlers import adminuser
+        from handlers import property
         from oslo.web.route import route
         self.route = route
         super(RouteHandler, self).__init__()

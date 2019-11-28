@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-19 14:34:42
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-26 16:23:19
+@LastEditTime: 2019-11-27 15:27:52
 @Description: 
 '''
 import json
@@ -16,7 +16,7 @@ from oslo.web.requesthandler import MixinRequestHandler
 from oslo.web.route import route
 from tornado.gen import coroutine
 
-from dblib.crud import CmdbAdminUser, CmdbHostAuth
+from dblib.crud import CmdbAdminUser, CmdbHostAuth, CmdbHost
 from forms.adminuser import (GetAdminUserForm, SaveAdminUserForm,
                              putAdminUserForm)
 from utils.sshkey import check_ssh_key
@@ -73,7 +73,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
             #authType为2的时候是 密钥认证方式
             status, _ = check_ssh_key(sshKey)
             if not status:
-                self.send_error(msg="密钥错误,请重新输入")
+                self.send_fail(msg="密钥错误,请重新输入")
                 return
 
         AdminUserDB = CmdbAdminUser()
@@ -86,7 +86,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
                                           desc=desc)
         if not db_status:
             LOG.warn("添加管理账号失败: {}".format(self.request_body()))
-            self.send_error(msg=msg)
+            self.send_fail(msg=msg)
             return
         return self.send_ok(data=u"添加成功")
 
@@ -110,7 +110,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
             # authType为2的时候是 密钥认证方式
             status, _ = check_ssh_key(sshKey)
             if not status:
-                self.send_error(msg="密钥错误,请重新输入")
+                self.send_fail(msg="密钥错误,请重新输入")
                 return
 
         AdminUserDB = CmdbAdminUser()
@@ -125,7 +125,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
         if db_status:
             self.send_ok(data="修改成功")
         else:
-            self.send_error(msg=msg)
+            self.send_fail(msg=msg)
         return
 
     @coroutine
@@ -143,9 +143,9 @@ class AdminUserBaseHandler(MixinRequestHandler):
             ids = json.loads(ids)
         except Exception:
             pass
-        AuthHostMap = CmdbHostAuth()
+        HostDb = CmdbHost()
         for item in ids:
-            check_auth_map = AuthHostMap.checkMapByauthId(item)
+            check_auth_map = HostDb.getDbObjByKeyValue("authInfo", item)
             if check_auth_map:
                 FAILD_LIST.append(item)
             else:
@@ -172,15 +172,28 @@ class uuidRequestHandler(MixinRequestHandler):
 
     @coroutine
     def delete(self, id):
-        AuthHostMap = CmdbHostAuth()
-        check_auth_map = AuthHostMap.checkMapByauthId(id)
+        HostDb = CmdbHost()
+        check_auth_map = HostDb.getDbObjByKeyValue("authInfo", id)
         if check_auth_map:
-            self.send_error(msg="此账号有绑定资产信息,请先解除绑定")
+            self.send_fail(msg="此账号有绑定资产信息,请先解除绑定")
             return
         AuthDb = CmdbAdminUser()
         code, msg = AuthDb.delById(id)
         if code:
             self.send_ok(data="")
         else:
-            self.send_error(msg=msg)
+            self.send_fail(msg=msg)
+        return
+
+
+@route("/cmdb/auth/select")
+class CmdbAuthSelect(MixinRequestHandler):
+    @coroutine
+    def get(self):
+        reps_list = []
+        authDB = CmdbAdminUser()
+        allList = authDB.getAll()
+        for item in allList:
+            reps_list.append(dict(id=item.id, value=item.name))
+        return self.send_ok(data=reps_list)
         return
