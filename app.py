@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-27 14:20:16
+@LastEditTime: 2019-11-29 11:58:41
 '''
 import logging
 import logging.config
@@ -57,12 +57,6 @@ class RouteHandler(object):
             自动注册路由的方式可以继承 application实现
             我这边是想实现像flask蓝本一样实现注册...所以暂时设置为这样
         """
-        # from handlers import auth
-        # from handlers import interface
-        # from handlers import menu
-        # from handlers import user
-        # from handlers import role
-        # from handlers import route
         from handlers import adminuser
         from handlers import property
         from oslo.web.route import route

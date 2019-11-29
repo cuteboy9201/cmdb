@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-29 09:51:03
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-29 11:53:24
+@LastEditTime: 2019-11-29 17:51:37
 @Description: 
 '''
 from functools import wraps
@@ -28,10 +28,7 @@ def async_check_permission(check_path, check_auth, check_method):
                                   method="POST",
                                   **req_data)
     yield req.fetch()
-    if req.request_ok:
-        reps_data = req.resp
-    else:
-        req_data = {}
+    reps_data = req.resp
     raise gen.Return(reps_data)
 
 
