@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-19 14:34:42
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-27 15:27:52
+@LastEditTime: 2019-11-29 11:29:03
 @Description: 
 '''
 import json
@@ -16,9 +16,10 @@ from oslo.web.requesthandler import MixinRequestHandler
 from oslo.web.route import route
 from tornado.gen import coroutine
 
-from dblib.crud import CmdbAdminUser, CmdbHostAuth, CmdbHost
+from dblib.crud import CmdbAdminUser, CmdbHost, CmdbHostAuth
 from forms.adminuser import (GetAdminUserForm, SaveAdminUserForm,
                              putAdminUserForm)
+from utils.auth import check_request_permission
 from utils.sshkey import check_ssh_key
 
 LOG = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ uuid_re = "(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
 
 @route("/cmdb/adminuser/")
 class AdminUserBaseHandler(MixinRequestHandler):
+    @check_request_permission()
     @coroutine
     def get(self):
         '''
@@ -53,6 +55,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
         self.send_ok(data=data)
         return
 
+    @check_request_permission()
     @coroutine
     def post(self):
         """ 添加host主机账号 """
@@ -90,6 +93,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
             return
         return self.send_ok(data=u"添加成功")
 
+    @check_request_permission()
     @coroutine
     def put(self):
         """修改管理账号信息"""
@@ -128,6 +132,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
             self.send_fail(msg=msg)
         return
 
+    @check_request_permission()
     @coroutine
     def delete(self):
         '''
@@ -161,6 +166,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
 
 @route("/cmdb/adminuser/{}".format(uuid_re))
 class uuidRequestHandler(MixinRequestHandler):
+    @check_request_permission()
     @coroutine
     def get(self, id):
 
@@ -170,6 +176,7 @@ class uuidRequestHandler(MixinRequestHandler):
         LOG.debug(uuidData)
         return self.send_ok(data=uuidData)
 
+    @check_request_permission()
     @coroutine
     def delete(self, id):
         HostDb = CmdbHost()
@@ -188,6 +195,7 @@ class uuidRequestHandler(MixinRequestHandler):
 
 @route("/cmdb/auth/select")
 class CmdbAuthSelect(MixinRequestHandler):
+    @check_request_permission()
     @coroutine
     def get(self):
         reps_list = []

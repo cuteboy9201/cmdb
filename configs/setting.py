@@ -13,9 +13,9 @@ import os
 debug = os.environ.get("RUN_ENV")
 
 if debug == "prod":
-    from configs.cfg import DB_HOST, BD_ECHO, DB_NAME
+    from configs.cfg import DB_HOST, BD_ECHO, DB_NAME, CHECK_PERMISSION_URI
 else:
-    from configs.dev_cfg import DB_HOST, BD_ECHO, DB_NAME
+    from configs.dev_cfg import DB_HOST, BD_ECHO, DB_NAME, CHECK_PERMISSION_URI
 
 PATH_APP_ROOT = os.path.abspath(
     os.path.join(

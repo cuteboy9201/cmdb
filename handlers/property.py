@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-20 17:15:56
 @LastEditors: Youshumin
-@LastEditTime: 2019-11-27 17:07:15
+@LastEditTime: 2019-11-29 11:29:55
 @Description: 
 '''
 import logging
@@ -17,7 +17,7 @@ from oslo.web.route import route
 from tornado.gen import coroutine
 from forms.property import BasePostForm, GETBaseForm, PUTBaseForm
 from dblib.crud import CmdbHost
-
+from utils.auth import check_request_permission
 LOG = logging.getLogger(__name__)
 
 uuid_re = "(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
@@ -33,6 +33,7 @@ class BaseHandler(MixinRequestHandler):
         delete: 根据ids列表删除资产
         put: 修改一台资产信息
     """
+    @check_request_permission()
     @coroutine
     def post(self):
         LOG.debug(self.request_body())
@@ -59,6 +60,7 @@ class BaseHandler(MixinRequestHandler):
             self.send_ok(data="添加成功")
         return
 
+    @check_request_permission()
     @coroutine
     def get(self):
         LOG.debug(self.request_body())
@@ -82,6 +84,8 @@ class BaseHandler(MixinRequestHandler):
         data = dict(totalCount=totalCount, rows=rows)
         return self.send_ok(data=data)
 
+    @check_request_permission()
+    @coroutine
     def delete(self):
         FAILD_LIST = []
         req_data = self.request_body()
@@ -111,6 +115,7 @@ class UuidReHandler(MixinRequestHandler):
         get: 获取UUID的基本信息
         put: 修改休息
     """
+    @check_request_permission()
     @coroutine
     def get(self, id):
         HostDB = CmdbHost()
@@ -120,6 +125,7 @@ class UuidReHandler(MixinRequestHandler):
         self.send_ok(data=uuid_info)
         return
 
+    @check_request_permission()
     @coroutine
     def put(self, id):
         form = PUTBaseForm(self)
@@ -142,6 +148,7 @@ class UuidReHandler(MixinRequestHandler):
             self.send_fail(msg=msg)
         return
 
+    @check_request_permission()
     @coroutine
     def delete(self, id):
         HostDB = CmdbHost()
