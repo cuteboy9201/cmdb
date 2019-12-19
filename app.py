@@ -3,13 +3,14 @@
 '''
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
-@LastEditors: Youshumin
-@LastEditTime: 2019-11-29 11:58:41
+@LastEditors  : Please set LastEditors
+@LastEditTime : 2019-12-18 14:29:01
 '''
 import logging
 import logging.config
 import os
 import sys
+
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -18,8 +19,10 @@ from oslo.db.module import mysqlHanlder
 from tornado.log import enable_pretty_logging
 from tornado.options import define, options
 
-from configs.setting import (ALLOW_HOST, COOKIE_SECRET, HOST, LOGFILE, PORT,
-                             PROJECT_NAME)
+from configs.setting import (ALLOW_HOST, COOKIE_SECRET, HOST, LOGFILE,
+                             MQ_SERVER_EXCHANGE, MQ_SERVER_QUEUE,
+                             MQ_SERVER_ROUTING_KEY, MQ_URL, PORT, PROJECT_NAME)
+from utils.mq import RabbitServer
 
 debug = os.environ.get("RUN_ENV")
 
@@ -107,11 +110,22 @@ class WebApp():
             define("allow_host", default=ALLOW_HOST, help="allow host")
         define("host", default=HOST, help="run on this host", type=str)
         define("port", default=PORT, help="run on this port", type=int)
-
+        self.io_loop = tornado.ioloop.IOLoop.instance()
         LOG.info(options.allow_host)
+
+    def initmq(self):
+        Application.mq_server = RabbitServer(io_loop=self.io_loop,
+                                             amqp_url=MQ_URL,
+                                             exchange=MQ_SERVER_EXCHANGE,
+                                             queue_name=MQ_SERVER_QUEUE,
+                                             routing_key=MQ_SERVER_ROUTING_KEY)
+        Application.mq_server.connect()
 
     def run(self):
         enable_pretty_logging()
+
+        self.initmq()
+
         http_server = tornado.httpserver.HTTPServer(Application(),
                                                     xheaders=True)
         if options.debug:
@@ -124,12 +138,12 @@ class WebApp():
             LOG.info("start app [%s] for %s:%s", PROJECT_NAME, options.host,
                      options.port)
         try:
-            tornado.ioloop.IOLoop.instance().start()
+            self.io_loop.start()
         except KeyboardInterrupt:
-            tornado.ioloop.IOLoop.instance().stop()
+            self.io_loop.stop()
 
     def stop(self):
-        tornado.ioloop.IOLoop.instance().stop()
+        self.io_loop.stop()
 
 
 def web_app():

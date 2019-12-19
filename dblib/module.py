@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-19 14:28:19
-@LastEditors: Youshumin
-@LastEditTime: 2019-11-27 14:57:42
+@LastEditors  : Please set LastEditors
+@LastEditTime : 2019-12-19 15:00:16
 @Description: 
 '''
 from sqlalchemy import Column, DateTime, ForeignKey, String
@@ -64,7 +64,6 @@ class CmdbHostAuth(Base):
     id = Column(String(40), primary_key=True)
     hostId = Column(ForeignKey("cmdb_host.id"), index=True)
     authId = Column(ForeignKey("cmdb_auth.id"), index=True)
-
     cmdb_auth = relationship("CmdbAuth", backref="auth_cmdb")
     cmdb_host = relationship("CmdbHost", backref="host_cmdb")
 

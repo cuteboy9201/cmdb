@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-29 09:51:03
-@LastEditors: Youshumin
-@LastEditTime: 2019-11-29 17:51:37
+@LastEditors  : Please set LastEditors
+@LastEditTime : 2019-12-18 16:00:35
 @Description: 
 '''
 from functools import wraps
@@ -51,6 +51,7 @@ def check_request_permission():
                     check_auth=check_auth,
                     check_path=check_path,
                     check_method=check_method)
+                print(check_permission)
                 LOG.debug(check_permission)
                 if check_permission.get("statusCode", None) == 200:
                     return func(self, *args, **kwargs)

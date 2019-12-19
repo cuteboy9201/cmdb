@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-20 11:40:07
-@LastEditors: Youshumin
-@LastEditTime: 2019-11-27 16:53:02
+@LastEditors  : Please set LastEditors
+@LastEditTime : 2019-12-19 10:27:50
 @Description: 
 '''
 import datetime
@@ -233,10 +233,10 @@ class CmdbHost(MixDbObj):
             check_id.desc = desc
             check_id.authInfo = authInfo
             check_id.env = env
+            updateTime = datetime.datetime.now()
             self.session.commit()
         except Exception as e:
             LOG.warning("{}".format(str(e)))
             self.session.rollback()
             return False, ""
         return True, ""
-    

@@ -3,21 +3,23 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-20 17:15:56
-@LastEditors: Youshumin
-@LastEditTime: 2019-11-29 11:29:55
+@LastEditors  : Please set LastEditors
+@LastEditTime : 2019-12-19 15:01:32
 @Description: 
 '''
 import logging
 import json
-
+from utils.mq import SendMsgToClient
 from oslo.form.form import form_error
 from oslo.util import dbObjFormatToJson
 from oslo.web.requesthandler import MixinRequestHandler
 from oslo.web.route import route
 from tornado.gen import coroutine
 from forms.property import BasePostForm, GETBaseForm, PUTBaseForm
-from dblib.crud import CmdbHost
+from dblib.crud import CmdbHost, CmdbAdminUser
 from utils.auth import check_request_permission
+from tornado.options import options
+from configs.setting import MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY
 LOG = logging.getLogger(__name__)
 
 uuid_re = "(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
@@ -57,6 +59,13 @@ class BaseHandler(MixinRequestHandler):
         if not code:
             self.send_fail(msg=msg)
         else:
+            # 保存成功的时候 发送消息到mq, 检测主机联通性
+            if authInfo and msg:
+                mq = SendMsgToClient(self.application.mq_server,
+                                     MQ_ANSIBLE_EXCHANGE,
+                                     MQ_ANSIBLE_ROUTING_KEY)
+                hostinfo = dict(id=msg, host=connectHost, port=connectPort)
+                mq.send_sysinfo(hostinfo, authInfo)
             self.send_ok(data="添加成功")
         return
 
@@ -113,7 +122,7 @@ class UuidReHandler(MixinRequestHandler):
     """
         /xxx/xxxx/uuid 对次uuid数据的相关操作
         get: 获取UUID的基本信息
-        put: 修改休息
+        put: 修改信息
     """
     @check_request_permission()
     @coroutine
@@ -143,6 +152,13 @@ class UuidReHandler(MixinRequestHandler):
         db_status, msg = HostDB.put(authInfo, connectHost, connectPort, desc,
                                     env, name, id)
         if db_status:
+            # 修改信息之后  重新检测主机联通性
+            if authInfo:
+                mq = SendMsgToClient(self.application.mq_server,
+                                     MQ_ANSIBLE_EXCHANGE,
+                                     MQ_ANSIBLE_ROUTING_KEY)
+                hostinfo = dict(id=id, host=connectHost, port=connectPort)
+                mq.send_sysinfo(hostinfo, authInfo)
             self.send_ok(data="修改成功")
         else:
             self.send_fail(msg=msg)
@@ -158,3 +174,32 @@ class UuidReHandler(MixinRequestHandler):
         else:
             self.send_fail(msg="")
         return
+
+
+@route("/cmdb/test")
+class TestHandler(MixinRequestHandler):
+    """
+        测试侧时候使使用
+    """
+    @coroutine
+    def get(self):
+        req_data = self.from_data()
+        test_info = req_data.get("test_info", None)
+
+        if test_info == "getadminbyid":
+            id = req_data.get("id", None)
+            admin_db = CmdbAdminUser()
+            get_admin = admin_db.getById(id)
+            return_info = dbObjFormatToJson(get_admin)
+            self.send_ok(data=return_info)
+            return
+
+        if test_info == "mq_sysinfo":
+            authid = "bc9670ae-f05c-4f75-8eaa-3e94999b6a7d"
+            hostid = "75f2cdb3-4cf0-485c-b166-b9c48beadbf4"
+            hostinfo = dict(host="192.168.2.132", port="22051", id=hostid)
+            mq = SendMsgToClient(self.application.mq_server,
+                                 MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY)
+            mq.send_sysinfo(hostinfo, authid)
+            self.send_ok(data="")
+            return
