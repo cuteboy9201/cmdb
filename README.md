@@ -1,8 +1,8 @@
 <!--
  * @Author: Youshumin
  * @Date: 2019-11-12 15:58:29
- * @LastEditors  : Please set LastEditors
- * @LastEditTime : 2019-12-19 15:18:43
+ * @LastEditors  : YouShumin
+ * @LastEditTime : 2019-12-26 10:03:24
  * @Description: 
  -->
 ## CMDB设计 
@@ -24,7 +24,7 @@
     * 主要是授权给用户登陆 比如 主机 ---> 用户[角色(将角色当成用户组)] ---> 认证用户[dev/super]
     
     表设计
-    id hostInfo userInfo roleInfo authInfo status createTime updateTime 
+    id hostInfo userInfo roleInfo authInfo authPass authPriKey authPubKey status desc createTime updateTime 
 
 ## 通信以及运行
 * 和前端通信时候使用restful接口形式

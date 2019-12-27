@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-19 14:28:19
-@LastEditors  : Please set LastEditors
-@LastEditTime : 2019-12-19 15:00:16
+@LastEditors  : YouShumin
+@LastEditTime : 2019-12-27 11:20:09
 @Description: 
 '''
 from sqlalchemy import Column, DateTime, ForeignKey, String
@@ -66,6 +66,40 @@ class CmdbHostAuth(Base):
     authId = Column(ForeignKey("cmdb_auth.id"), index=True)
     cmdb_auth = relationship("CmdbAuth", backref="auth_cmdb")
     cmdb_host = relationship("CmdbHost", backref="host_cmdb")
+
+
+class CmdbUserRight(Base):
+    """
+        资产授权表
+        id hostInfo userInfo roleInfo authInfo authPass authPriKey authPubKey status desc createTime updateTime 
+    """
+
+    __tablename__ = "cmdb_user_right"
+
+    id = Column(String(40), primary_key=True)
+    userInfo = Column(String(512), )
+    roleInfo = Column(String(256), )
+    hostInfo = Column(String(2048), )
+    authUser = Column(String(40), )
+    # authPass = Column(String(64), )
+    # authPriKey = Column(String(2048))
+    # authPubKey = Column(String(512))
+    status = Column(TINYINT(1))
+    desc = Column(String(64), )
+    createTime = Column(DateTime)
+    updateTime = Column(DateTime)
+
+
+class CmdbSysUserAuth(Base):
+    __tablename__ = "cmdb_sysuser_auth"
+    id = Column(String(40), primary_key=True)
+    hostId = Column(ForeignKey("cmdb_host.id"), index=True)
+    authUser = Column(String(40))
+    authPass = Column(String(40))
+    authPriKey = Column(String(2048))
+    authPubKey = Column(String(512))
+    createTime = Column(DateTime)
+    updateTime = Column(DateTime)
 
 
 if __name__ == "__main__":

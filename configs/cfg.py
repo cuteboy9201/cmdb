@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-13 11:13:01
-@LastEditors  : Please set LastEditors
-@LastEditTime : 2019-12-18 15:44:53
+@LastEditors  : YouShumin
+@LastEditTime : 2019-12-26 17:17:29
 @Description: 
 '''
 DB_HOST = "mysql+pymysql://rbac:123456@192.168.2.69:12502/cute_rbac?charset=utf8"
@@ -20,3 +20,14 @@ MQ_SERVER_ROUTING_KEY = "return_cmdb.key"
 
 MQ_ANSIBLE_EXCHANGE = "ansible_exchange"
 MQ_ANSIBLE_ROUTING_KEY = "ansible.client"
+
+# 具有sudo权限应用 [sudo]
+SYS_SUDO_USER = "kw_sudo"
+# 项目应用 属公司开发项目 【运维权限】
+SYS_APP_USER = "kw_app"
+# 只读账号 一般给开发查看日志使用 【开发权限】
+SYS_READ_ONLY_USER = "kw_scan"
+# LNMP应用安装使用账户 【不具有登陆权限】
+SYS_WWW_USER = "kw_www"
+# 基础应用安装redis、memcache、mysql... 【不具有登陆权限】
+SYS_BASE_USER = "kw_base"

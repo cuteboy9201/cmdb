@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
-@LastEditors  : Please set LastEditors
-@LastEditTime : 2019-12-18 14:29:01
+@LastEditors  : YouShumin
+@LastEditTime : 2019-12-27 17:55:58
 '''
 import logging
 import logging.config
@@ -62,6 +62,7 @@ class RouteHandler(object):
         """
         from handlers import adminuser
         from handlers import property
+        from handlers import userright
         from oslo.web.route import route
         self.route = route
         super(RouteHandler, self).__init__()
@@ -114,17 +115,18 @@ class WebApp():
         LOG.info(options.allow_host)
 
     def initmq(self):
-        Application.mq_server = RabbitServer(io_loop=self.io_loop,
-                                             amqp_url=MQ_URL,
-                                             exchange=MQ_SERVER_EXCHANGE,
-                                             queue_name=MQ_SERVER_QUEUE,
-                                             routing_key=MQ_SERVER_ROUTING_KEY)
+        Application.mq_server = RabbitServer()
+        Application.mq_server.init(io_loop=self.io_loop,
+                                   amqp_url=MQ_URL,
+                                   exchange=MQ_SERVER_EXCHANGE,
+                                   queue_name=MQ_SERVER_QUEUE,
+                                   routing_key=MQ_SERVER_ROUTING_KEY)
         Application.mq_server.connect()
 
     def run(self):
         enable_pretty_logging()
 
-        self.initmq()
+        # self.initmq()
 
         http_server = tornado.httpserver.HTTPServer(Application(),
                                                     xheaders=True)

@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-20 11:40:07
-@LastEditors  : Please set LastEditors
-@LastEditTime : 2019-12-19 10:27:50
+@LastEditors  : YouShumin
+@LastEditTime : 2019-12-27 11:57:02
 @Description: 
 '''
 import datetime
@@ -47,6 +47,11 @@ class MixDbObj:
     def getDbObjByKeyValue(self, key, value):
         item = {key: value}
         db = self.db_obj.filter_by(**item).first()
+        return db
+
+    def getAllByKeyValue(self, key, value):
+        item = {key: value}
+        db = self.db_obj.filter_by(**item).all()
         return db
 
     def getAll(self):
@@ -240,3 +245,63 @@ class CmdbHost(MixDbObj):
             self.session.rollback()
             return False, ""
         return True, ""
+
+
+class CmdbUserRight(MixDbObj):
+    """
+    
+    """
+    def __init__(self, table=''):
+        self.table = ORM.CmdbUserRight
+        super(CmdbUserRight, self).__init__(table=self.table)
+
+    def post(self, hostInfo, authUser, userInfo, roleInfo, desc):
+        try:
+            id = create_id()
+            add_data = self.table(id=id,
+                                  hostInfo=hostInfo,
+                                  authUser=authUser,
+                                  userInfo=userInfo,
+                                  roleInfo=roleInfo,
+                                  desc=desc,
+                                  createTime=datetime.datetime.now(),
+                                  updateTime=datetime.datetime.now())
+            self.session.add(add_data)
+            self.session.commit()
+            return True, id
+        except Exception as e:
+            LOG.warning("{}".format(str(e)))
+            self.session.rollback()
+            return False, ""
+
+
+class CmdbSysUserAuth(MixDbObj):
+    def __init__(self, table=''):
+        self.table = ORM.CmdbSysUserAuth
+        super(CmdbSysUserAuth, self).__init__(table=self.table)
+
+    def check_exits(self, hostId, authUser):
+        check_data = self.db_obj.filter(
+            self.table.hostId == hostId,
+            self.table.authUser == authUser).first()
+        return check_data
+
+    def post(self, hostId, authUser, authPass, authPriKey, authPubKey):
+        check_data = self.check_exits(hostId, authUser)
+        if check_data:
+            return False, ""
+        id = create_id()
+        try:
+            add_data = self.table(id=id,
+                                  hostId=hostId,
+                                  authUser=authUser,
+                                  authPass=authPass,
+                                  authPriKey=authPriKey,
+                                  authPubKey=authPubKey)
+            self.session.add(add_data)
+            self.session.commit()
+            return True, id
+        except Exception as e:
+            LOG.error(e)
+            self.session.rollback()
+            return False, ""
