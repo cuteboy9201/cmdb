@@ -1,11 +1,8 @@
-certifi==2019.11.28
 #oslo==1.0.2 https://github.com/cuteboy9201/oslo.git
 pika==1.1.0
-pyasn1==0.4.8
 PyMySQL==0.9.3
 rsa==4.0
-sentry-sdk==0.13.2
-simplejson==3.16.0
+# sentry-sdk==0.13.2
 SQLAlchemy==1.3.12
 tornado==5.1.1
-urllib3==1.25.7
+

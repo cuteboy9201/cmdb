@@ -2,15 +2,15 @@
 ### 
 # @Author: Youshumin
 # @Date: 2019-11-15 12:01:01
- # @LastEditors: Youshumin
- # @LastEditTime: 2019-11-22 17:28:23
+ # @LastEditors  : YouShumin
+ # @LastEditTime : 2020-01-02 09:40:48
 # @Description: 
 ###
 
 workdir=$(cd $(dirname $0); pwd) 
 export PYTHONPATH=$PYTHONPATH:${workdir} 
 
-pyenv="/Users/youshumin/Desktop/cuteboy9201/cmdb/.env/bin/python3.7"
+pyenv="${workdir}/.env/bin/python"
 
 start_main(){
     cd $workdir
