@@ -4,13 +4,14 @@
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
 @LastEditors  : YouShumin
-@LastEditTime : 2019-12-27 17:55:58
+@LastEditTime : 2019-12-31 11:56:40
 '''
 import logging
 import logging.config
 import os
 import sys
 
+from tornado import gen
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -22,7 +23,8 @@ from tornado.options import define, options
 from configs.setting import (ALLOW_HOST, COOKIE_SECRET, HOST, LOGFILE,
                              MQ_SERVER_EXCHANGE, MQ_SERVER_QUEUE,
                              MQ_SERVER_ROUTING_KEY, MQ_URL, PORT, PROJECT_NAME)
-from utils.mq import RabbitServer
+from oslo.task.rabbitmq import TornadoAdapter
+from task.receive_handler import ReceiveHandle
 
 debug = os.environ.get("RUN_ENV")
 
@@ -114,19 +116,19 @@ class WebApp():
         self.io_loop = tornado.ioloop.IOLoop.instance()
         LOG.info(options.allow_host)
 
+    @gen.coroutine
+    def mq_handler(self, *args, **kwargs):
+        ReceiveHandle(args)
+
     def initmq(self):
-        Application.mq_server = RabbitServer()
-        Application.mq_server.init(io_loop=self.io_loop,
-                                   amqp_url=MQ_URL,
-                                   exchange=MQ_SERVER_EXCHANGE,
-                                   queue_name=MQ_SERVER_QUEUE,
-                                   routing_key=MQ_SERVER_ROUTING_KEY)
-        Application.mq_server.connect()
+        mq = TornadoAdapter(MQ_URL)
+        mq.receive(MQ_SERVER_EXCHANGE, MQ_SERVER_ROUTING_KEY, MQ_SERVER_QUEUE,
+                   self.mq_handler)
 
     def run(self):
         enable_pretty_logging()
 
-        # self.initmq()
+        self.initmq()
 
         http_server = tornado.httpserver.HTTPServer(Application(),
                                                     xheaders=True)

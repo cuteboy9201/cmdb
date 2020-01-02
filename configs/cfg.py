@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-13 11:13:01
 @LastEditors  : YouShumin
-@LastEditTime : 2019-12-26 17:17:29
+@LastEditTime : 2019-12-31 15:21:40
 @Description: 
 '''
 DB_HOST = "mysql+pymysql://rbac:123456@192.168.2.69:12502/cute_rbac?charset=utf8"
@@ -14,12 +14,12 @@ CHECK_PERMISSION_URI = "http://192.168.2.132:18080/rbac/check_permission"
 
 MQ_URL = "amqp://admin:admin@192.168.2.132:5672/my_vhost"
 # RABBIT_SERVER
-MQ_SERVER_QUEUE = "return_cmdb_queue"
-MQ_SERVER_EXCHANGE = "return_cmdb_exchange"
-MQ_SERVER_ROUTING_KEY = "return_cmdb.key"
+MQ_SERVER_QUEUE = "cute_cmdb_queue"
+MQ_SERVER_EXCHANGE = "cute_cmdb_exchange"
+MQ_SERVER_ROUTING_KEY = "cute_cmdb_routing_key"
 
-MQ_ANSIBLE_EXCHANGE = "ansible_exchange"
-MQ_ANSIBLE_ROUTING_KEY = "ansible.client"
+MQ_ANSIBLE_EXCHANGE = "cute_ansible_exchange"
+MQ_ANSIBLE_ROUTING_KEY = "cute_ansible_routing_key"
 
 # 具有sudo权限应用 [sudo]
 SYS_SUDO_USER = "kw_sudo"

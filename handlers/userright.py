@@ -3,27 +3,32 @@
 '''
 @Author: YouShumin
 @Date: 2019-11-20 17:15:56
-@LastEditTime : 2019-12-27 17:55:24
+@LastEditTime : 2019-12-31 12:18:27
 @LastEditors  : YouShumin
 @Description: 
 @FilePath: /cmdb/handlers/userright.py
 '''
-import logging
 import json
-from utils.mq import SendMsgToClient
+import logging
+
+from configs.setting import (MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY,
+                             MQ_URL, SYS_APP_USER, SYS_READ_ONLY_USER,
+                             SYS_SUDO_USER)
+from dblib.crud import CmdbAdminUser, CmdbHost, CmdbSysUserAuth, CmdbUserRight
+from forms.userright import UserRightPost
 from oslo.form.form import form_error
-from oslo.util import dbObjFormatToJson
+from oslo.task.rabbitmq import TornadoAdapter
+from oslo.util import dbObjFormatToJson, create_id
 from oslo.web.requesthandler import MixinRequestHandler
 from oslo.web.route import route
+from task.publish import test
+from tornado import gen
 from tornado.gen import coroutine
-from forms.userright import UserRightPost
-from dblib.crud import CmdbHost, CmdbAdminUser, CmdbUserRight, CmdbSysUserAuth
-from utils.auth import check_request_permission
 from tornado.options import options
-from configs.setting import MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY
-from configs.setting import SYS_APP_USER, SYS_SUDO_USER, SYS_READ_ONLY_USER
-from utils.rabbitmq_rdapter import TornadoAdapter
-from configs.setting import MQ_URL, MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY
+from utils.auth import check_request_permission
+from utils.mq import SendMsgToClient
+from task.publish import PublishMQ
+
 LOG = logging.getLogger(__name__)
 
 
@@ -34,7 +39,18 @@ class TESTHANDLER(MixinRequestHandler):
         mq = TornadoAdapter(MQ_URL)
         body = {"hello": "world!!!"}
         print("xxx")
-        mq.publish(MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY, body)
+        mq.publish(MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY,
+                   json.dumps(body))
+        yield gen.sleep(10)
+        self.send_ok(data="")
+        return
+
+
+@route("/cmdb/123")
+class TESTHANDLER(MixinRequestHandler):
+    @coroutine
+    def get(self):
+        test()
         self.send_ok(data="")
         return
 
@@ -86,13 +102,18 @@ class CmdbUserRightHandler(MixinRequestHandler):
         if code:
             self.send_ok(data="添加成功")
             check_host_user_db = CmdbSysUserAuth()
-            mq = SendMsgToClient(self.application.mq_server,
-                                 MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY)
+            # mq = SendMsgToClient(self.application.mq_server,
+            #                      MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY)
+            mq = PublishMQ()
             for item in eval(hostInfo):
                 check_exist = check_host_user_db.check_exits(item, authUser)
                 if not check_exist:
-                    args = {"user": authUser, "state": "present"}
-                    mq.send_create_user(item, args)
+                    msg_data = {"user": authUser, "state": "present"}
+                    msg_id = create_id()
+                    mq.send_ansible_msg(
+                        dict(msg_id=msg_id,
+                             msg_data=msg_data,
+                             msg_backable=False))
         else:
             self.send_fail(msg="添加失败")
         return

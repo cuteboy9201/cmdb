@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-20 17:15:56
-@LastEditors  : Please set LastEditors
-@LastEditTime : 2019-12-19 15:01:32
+@LastEditors  : YouShumin
+@LastEditTime : 2019-12-31 15:48:19
 @Description: 
 '''
 import logging
@@ -20,6 +20,7 @@ from dblib.crud import CmdbHost, CmdbAdminUser
 from utils.auth import check_request_permission
 from tornado.options import options
 from configs.setting import MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY
+from task.publish import PublishMQ
 LOG = logging.getLogger(__name__)
 
 uuid_re = "(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
@@ -61,11 +62,11 @@ class BaseHandler(MixinRequestHandler):
         else:
             # 保存成功的时候 发送消息到mq, 检测主机联通性
             if authInfo and msg:
-                mq = SendMsgToClient(self.application.mq_server,
-                                     MQ_ANSIBLE_EXCHANGE,
-                                     MQ_ANSIBLE_ROUTING_KEY)
+                mq = PublishMQ()
                 hostinfo = dict(id=msg, host=connectHost, port=connectPort)
-                mq.send_sysinfo(hostinfo, authInfo)
+                mq.send_ansible_msg(hostinfo=hostinfo,
+                                    task="setup",
+                                    authinfo=authInfo)
             self.send_ok(data="添加成功")
         return
 
@@ -154,11 +155,11 @@ class UuidReHandler(MixinRequestHandler):
         if db_status:
             # 修改信息之后  重新检测主机联通性
             if authInfo:
-                mq = SendMsgToClient(self.application.mq_server,
-                                     MQ_ANSIBLE_EXCHANGE,
-                                     MQ_ANSIBLE_ROUTING_KEY)
+                mq = PublishMQ()
                 hostinfo = dict(id=id, host=connectHost, port=connectPort)
-                mq.send_sysinfo(hostinfo, authInfo)
+                mq.send_ansible_msg(hostinfo=hostinfo,
+                                    body=dict(module="setup"),
+                                    authinfo=authInfo)
             self.send_ok(data="修改成功")
         else:
             self.send_fail(msg=msg)

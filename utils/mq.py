@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-12-18 10:03:38
 @LastEditors  : YouShumin
-@LastEditTime : 2019-12-27 14:57:30
+@LastEditTime : 2019-12-30 16:32:28
 @Description:
 '''
 import datetime
@@ -22,10 +22,6 @@ LOG = logging.getLogger(__name__)
 
 
 class RabbitServer(mq_server.PikaPublisher):
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.props = pika.BasicProperties(reply_to=self.ROUTING_KEY,
-    #                                       message_id=self.EXCHANGE)
     def init(self, *args, **kwargs):
         super().init(*args, **kwargs)
         self.props = pika.BasicProperties(reply_to=self.ROUTING_KEY,
