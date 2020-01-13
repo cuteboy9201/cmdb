@@ -3,13 +3,13 @@
 # @Author: Youshumin
 # @Date: 2019-11-15 12:01:01
  # @LastEditors  : YouShumin
- # @LastEditTime : 2020-01-02 09:40:48
+ # @LastEditTime : 2020-01-13 02:14:57
 # @Description: 
 ###
 
 workdir=$(cd $(dirname $0); pwd) 
 export PYTHONPATH=$PYTHONPATH:${workdir} 
-
+export RUN_ENV=prod
 pyenv="${workdir}/.env/bin/python"
 
 start_main(){
@@ -20,8 +20,8 @@ start_main(){
 rbac_db_init(){
     cd ${workdir}/dblib
     ${pyenv} module.py create
-    # ${pyenv} init_data.py
 }
+
 rbac_db_del(){
     cd ${workdir}/dblib
     ${pyenv} module.py drop

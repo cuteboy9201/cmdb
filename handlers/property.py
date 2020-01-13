@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-20 17:15:56
 @LastEditors  : YouShumin
-@LastEditTime : 2019-12-31 15:48:19
+@LastEditTime : 2020-01-13 06:41:24
 @Description: 
 '''
 import logging
@@ -23,7 +23,7 @@ from configs.setting import MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY
 from task.publish import PublishMQ
 LOG = logging.getLogger(__name__)
 
-uuid_re = "(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
+uuid_re = r"(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
 
 
 @route("/cmdb/property/")
@@ -65,8 +65,7 @@ class BaseHandler(MixinRequestHandler):
                 mq = PublishMQ()
                 hostinfo = dict(id=msg, host=connectHost, port=connectPort)
                 mq.send_ansible_msg(hostinfo=hostinfo,
-                                    task="setup",
-                                    authinfo=authInfo)
+                                    body=dict(module="setup"))
             self.send_ok(data="添加成功")
         return
 
@@ -109,6 +108,7 @@ class BaseHandler(MixinRequestHandler):
         for item in ids:
             code, msg = HostDB.delById(item)
             if not code:
+                LOG.warning("删除%s失败%s", item, msg)
                 FAILD_LIST.append(item)
         if FAILD_LIST:
             req_data = {"有成功删除的资产": FAILD_LIST}
@@ -158,8 +158,7 @@ class UuidReHandler(MixinRequestHandler):
                 mq = PublishMQ()
                 hostinfo = dict(id=id, host=connectHost, port=connectPort)
                 mq.send_ansible_msg(hostinfo=hostinfo,
-                                    body=dict(module="setup"),
-                                    authinfo=authInfo)
+                                    body=dict(module="setup"))
             self.send_ok(data="修改成功")
         else:
             self.send_fail(msg=msg)
@@ -173,6 +172,7 @@ class UuidReHandler(MixinRequestHandler):
         if code:
             self.send_ok(data="")
         else:
+            LOG.warning("删除%s失败%s", id, msg)
             self.send_fail(msg="")
         return
 

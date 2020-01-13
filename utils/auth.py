@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-29 09:51:03
-@LastEditors  : Please set LastEditors
-@LastEditTime : 2019-12-18 16:00:35
+@LastEditors  : YouShumin
+@LastEditTime : 2020-01-13 03:16:45
 @Description: 
 '''
 from functools import wraps
@@ -51,7 +51,6 @@ def check_request_permission():
                     check_auth=check_auth,
                     check_path=check_path,
                     check_method=check_method)
-                print(check_permission)
                 LOG.debug(check_permission)
                 if check_permission.get("statusCode", None) == 200:
                     return func(self, *args, **kwargs)
@@ -62,3 +61,17 @@ def check_request_permission():
         return wrapper
 
     return wraps_fun
+
+
+def WebRequestDataLog(func):
+    @wraps(func)
+    @gen.coroutine
+    def wrapper(self, *args, **kwargs):
+        req_data = self.request_body()
+        req_path = self.request.path
+        req_method = self.request.method
+        LOG.info("req_method: %s,req_path: %s, req_data: %s", req_method,
+                 req_path, req_data)
+        return func(self, *args, **kwargs)
+
+    return wrapper

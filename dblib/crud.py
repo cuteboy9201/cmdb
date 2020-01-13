@@ -4,18 +4,17 @@
 @Author: Youshumin
 @Date: 2019-11-20 11:40:07
 @LastEditors  : YouShumin
-@LastEditTime : 2019-12-27 11:57:02
+@LastEditTime : 2020-01-13 08:30:31
 @Description: 
 '''
 import datetime
 import logging
 
-from oslo.db.module import mysqlHanlder
-from oslo.util import create_id, dbObjFormatToJson
-from sqlalchemy import and_, desc, asc
-
 from configs.setting import DB_NAME
 from dblib import module as ORM
+from oslo.db.module import mysqlHanlder
+from oslo.util import create_id, dbObjFormatToJson
+from sqlalchemy import and_, asc, desc
 
 LOG = logging.getLogger(__name__)
 
@@ -216,7 +215,6 @@ class CmdbHost(MixDbObj):
             return False, ""
 
     def getPage(self, pageIndex, pageSize, descending, name):
-        reps_list = []
 
         offset_num = (pageIndex - 1) * pageSize
         db_obj = self.db_obj
@@ -238,7 +236,7 @@ class CmdbHost(MixDbObj):
             check_id.desc = desc
             check_id.authInfo = authInfo
             check_id.env = env
-            updateTime = datetime.datetime.now()
+            check_id.updateTime = datetime.datetime.now()
             self.session.commit()
         except Exception as e:
             LOG.warning("{}".format(str(e)))
@@ -274,6 +272,18 @@ class CmdbUserRight(MixDbObj):
             self.session.rollback()
             return False, ""
 
+    def getPage(self, pageIndex, pageSize, descending):
+        offset_num = (pageIndex - 1) * pageSize
+        db_obj = self.db_obj
+        # 搜索...
+        db = db_obj.all()
+        totalCount = len(db)
+        get_db = db_obj.limit(pageSize).offset(offset_num).all()
+        return totalCount, get_db
+
+    def getRightHost(self, roleId="", userId=""):
+        db_obj = self.db_obj.all()
+
 
 class CmdbSysUserAuth(MixDbObj):
     def __init__(self, table=''):
@@ -289,7 +299,7 @@ class CmdbSysUserAuth(MixDbObj):
     def post(self, hostId, authUser, authPass, authPriKey, authPubKey):
         check_data = self.check_exits(hostId, authUser)
         if check_data:
-            return False, ""
+            return "exist", check_data.id
         id = create_id()
         try:
             add_data = self.table(id=id,
@@ -297,7 +307,9 @@ class CmdbSysUserAuth(MixDbObj):
                                   authUser=authUser,
                                   authPass=authPass,
                                   authPriKey=authPriKey,
-                                  authPubKey=authPubKey)
+                                  authPubKey=authPubKey,
+                                  createTime=datetime.datetime.now(),
+                                  updateTime=datetime.datetime.now())
             self.session.add(add_data)
             self.session.commit()
             return True, id

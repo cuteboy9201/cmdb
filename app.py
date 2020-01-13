@@ -4,27 +4,26 @@
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
 @LastEditors  : YouShumin
-@LastEditTime : 2019-12-31 11:56:40
+@LastEditTime : 2020-01-03 03:09:12
 '''
 import logging
 import logging.config
 import os
 import sys
 
-from tornado import gen
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
-from oslo.db.module import mysqlHanlder
-from tornado.log import enable_pretty_logging
-from tornado.options import define, options
-
 from configs.setting import (ALLOW_HOST, COOKIE_SECRET, HOST, LOGFILE,
                              MQ_SERVER_EXCHANGE, MQ_SERVER_QUEUE,
                              MQ_SERVER_ROUTING_KEY, MQ_URL, PORT, PROJECT_NAME)
+from oslo.db.module import mysqlHanlder
 from oslo.task.rabbitmq import TornadoAdapter
 from task.receive_handler import ReceiveHandle
+from tornado import gen
+from tornado.log import enable_pretty_logging
+from tornado.options import define, options
 
 debug = os.environ.get("RUN_ENV")
 

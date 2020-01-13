@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-19 14:34:42
-@LastEditors: Youshumin
-@LastEditTime: 2019-11-29 11:29:03
+@LastEditors  : YouShumin
+@LastEditTime : 2020-01-13 06:40:42
 @Description: 
 '''
 import json
@@ -24,7 +24,7 @@ from utils.sshkey import check_ssh_key
 
 LOG = logging.getLogger(__name__)
 
-uuid_re = "(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
+uuid_re = r"(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
 
 
 @route("/cmdb/adminuser/")
@@ -156,6 +156,7 @@ class AdminUserBaseHandler(MixinRequestHandler):
             else:
                 AuthDb = CmdbAdminUser()
                 code, msg = AuthDb.delById(item)
+                LOG.debug("删除%s状态%s信息%s", item, code, msg)
         if FAILD_LIST:
             reps_data = {"有绑定资产账号未删除": FAILD_LIST}
         else:
@@ -204,4 +205,3 @@ class CmdbAuthSelect(MixinRequestHandler):
         for item in allList:
             reps_list.append(dict(id=item.id, value=item.name))
         return self.send_ok(data=reps_list)
-        return
