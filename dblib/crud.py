@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-20 11:40:07
-@LastEditors  : YouShumin
-@LastEditTime : 2020-01-13 08:30:31
+@LastEditors: YouShumin
+@LastEditTime: 2020-04-01 18:48:12
 @Description: 
 '''
 import datetime
@@ -19,7 +19,7 @@ from sqlalchemy import and_, asc, desc
 LOG = logging.getLogger(__name__)
 
 
-class MixDbObj:
+class MixDbObj(object):
     def __init__(self, table=""):
         self.table = table
         self.session = mysqlHanlder().get_session(db_name=DB_NAME)
@@ -117,12 +117,13 @@ class CmdbAdminUser(MixDbObj):
             db_obj = db_obj.filter(self.table.name == name)
         db = db_obj.all()
         totalCount = len(db)
+
         get_db = db_obj.limit(pageSize).offset(offset_num).all()
 
         if get_db:
             for auth in get_db:
-                auth_host = self.session.query(ORM.CmdbHostAuth).filter(
-                    ORM.CmdbHostAuth.authId == auth.id).all()
+                auth_host = self.session.query(ORM.CmdbHost).filter(
+                    ORM.CmdbHost.authInfo == auth.id).all()
 
                 isactive = 0
                 disactive = 0
@@ -131,9 +132,8 @@ class CmdbAdminUser(MixDbObj):
 
                 if auth_host:
                     hostnums = len(auth_host)
-
                     for item in auth_host:
-                        if item.cmdb_host.status == 1:
+                        if item.status == 1:
                             isactive += 1
                         else:
                             disactive += 1

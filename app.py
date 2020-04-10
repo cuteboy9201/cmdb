@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
-@LastEditors  : YouShumin
-@LastEditTime : 2020-01-03 03:09:12
+@LastEditors: YouShumin
+@LastEditTime: 2020-04-01 17:08:35
 '''
 import logging
 import logging.config
@@ -20,7 +20,7 @@ from configs.setting import (ALLOW_HOST, COOKIE_SECRET, HOST, LOGFILE,
                              MQ_SERVER_ROUTING_KEY, MQ_URL, PORT, PROJECT_NAME)
 from oslo.db.module import mysqlHanlder
 from oslo.task.rabbitmq import TornadoAdapter
-from task.receive_handler import ReceiveHandle
+# from task.receive_handler import ReceiveHandle
 from tornado import gen
 from tornado.log import enable_pretty_logging
 from tornado.options import define, options
@@ -50,6 +50,8 @@ class LogHandler(object):
 
 p_version = sys.version_info.major
 if p_version == 2:
+    reload(sys)
+    sys.setdefaultencoding('utf8')
     LogHandler()
 
 
@@ -64,6 +66,7 @@ class RouteHandler(object):
         from handlers import adminuser
         from handlers import property
         from handlers import userright
+        from handlers import test
         from oslo.web.route import route
         self.route = route
         super(RouteHandler, self).__init__()

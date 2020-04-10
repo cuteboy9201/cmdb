@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-20 17:15:56
-@LastEditors  : YouShumin
-@LastEditTime : 2020-01-13 06:41:24
+@LastEditors: YouShumin
+@LastEditTime: 2020-04-01 17:30:53
 @Description: 
 '''
 import logging
@@ -20,7 +20,7 @@ from dblib.crud import CmdbHost, CmdbAdminUser
 from utils.auth import check_request_permission
 from tornado.options import options
 from configs.setting import MQ_ANSIBLE_EXCHANGE, MQ_ANSIBLE_ROUTING_KEY
-from task.publish import PublishMQ
+from task.publish import PublishMQ, HandlerReturnMsg, HandlerSendMsg
 LOG = logging.getLogger(__name__)
 
 uuid_re = r"(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
@@ -30,7 +30,6 @@ uuid_re = r"(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
 class BaseHandler(MixinRequestHandler):
     """
         请求path中不带uuid的请求
-        
         post: 添加一台资产信息
         get: 获取资产信息列表
         delete: 根据ids列表删除资产
@@ -62,10 +61,8 @@ class BaseHandler(MixinRequestHandler):
         else:
             # 保存成功的时候 发送消息到mq, 检测主机联通性
             if authInfo and msg:
-                mq = PublishMQ()
-                hostinfo = dict(id=msg, host=connectHost, port=connectPort)
-                mq.send_ansible_msg(hostinfo=hostinfo,
-                                    body=dict(module="setup"))
+                send_data = HandlerSendMsg()
+                send_data.setup_handler(msg)
             self.send_ok(data="添加成功")
         return
 

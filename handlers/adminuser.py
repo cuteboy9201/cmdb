@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-19 14:34:42
-@LastEditors  : YouShumin
-@LastEditTime : 2020-01-13 06:40:42
+@LastEditors: YouShumin
+@LastEditTime: 2020-04-01 18:36:12
 @Description: 
 '''
 import json
@@ -29,6 +29,12 @@ uuid_re = r"(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
 
 @route("/cmdb/adminuser/")
 class AdminUserBaseHandler(MixinRequestHandler):
+    """
+        get: 获取管理账号信息,展示可联通性数量
+        post: 添加管理账号
+        put: 修改管理账号
+        delete: 删除管理账号
+    """
     @check_request_permission()
     @coroutine
     def get(self):

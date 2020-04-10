@@ -1,0 +1,8 @@
+version: '2.1'
+
+services:
+  cute_cmdb:
+    image: cute_cmdb
+    build: .
+    ports:
+      - 3000:3000

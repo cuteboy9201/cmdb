@@ -3,8 +3,8 @@
 '''
 @Author: Youshumin
 @Date: 2019-11-29 09:51:03
-@LastEditors  : YouShumin
-@LastEditTime : 2020-01-13 03:16:45
+@LastEditors: YouShumin
+@LastEditTime: 2020-04-01 16:55:52
 @Description: 
 '''
 from functools import wraps
@@ -53,7 +53,8 @@ def check_request_permission():
                     check_method=check_method)
                 LOG.debug(check_permission)
                 if check_permission.get("statusCode", None) == 200:
-                    return func(self, *args, **kwargs)
+                    func(self, *args, **kwargs)
+                    return
             # return func(self, *args, **kwargs)
             self.send_fail(msg="没有权限", code=403, status=403)
             return
@@ -64,6 +65,10 @@ def check_request_permission():
 
 
 def WebRequestDataLog(func):
+    """
+        记录请求方法, 请求路径, 请求数据
+        方便调试
+    """
     @wraps(func)
     @gen.coroutine
     def wrapper(self, *args, **kwargs):
