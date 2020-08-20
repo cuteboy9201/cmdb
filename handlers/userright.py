@@ -3,7 +3,7 @@
 '''
 @Author: YouShumin
 @Date: 2019-11-20 17:15:56
-@LastEditTime: 2020-03-25 12:06:27
+@LastEditTime: 2020-07-06 14:33:36
 @LastEditors: YouShumin
 @Description: 
 @FilePath: /cute_cmdb/handlers/userright.py
@@ -34,6 +34,7 @@ from utils.auth import WebRequestDataLog, check_request_permission
 LOG = logging.getLogger(__name__)
 
 uuid_re = r"(?P<id>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
+uuid_re2 = r"(?P<id2>[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})"
 
 
 @route("/cmdb/select/host")
@@ -62,9 +63,13 @@ class UserHostHandler(MixinRequestHandler):
 
 @route("/cmdb/user/right")
 class CmdbUserRightHandler(MixinRequestHandler):
+    """
+        用户授权
+    """
     @WebRequestDataLog
     @coroutine
     def post(self):
+        """" 给用户添加能访问的资产 """
         form = UserRightPost(self)
         if form.is_valid():
             hostInfo = form.value_dict["hostInfo"]
@@ -87,6 +92,8 @@ class CmdbUserRightHandler(MixinRequestHandler):
             mq = PublishMQ()
             for item in eval(hostInfo):
                 check_exist = check_host_user_db.check_exits(item, authUser)
+
+                print(len(check_exist))
                 if not check_exist:
                     msg_data = {
                         "user": authUser,
@@ -103,8 +110,8 @@ class CmdbUserRightHandler(MixinRequestHandler):
 
     @WebRequestDataLog
     def get(self):
+        """ 获取资产授权页面列表 """
         form = GetUserRightInfo(self)
-
         if form.is_valid():
             pageIndex = form.value_dict["pageIndex"]
             pageSize = form.value_dict["pageSize"]
@@ -134,6 +141,7 @@ class CmdbUserRightHandler(MixinRequestHandler):
             data.setdefault("desc", desc)
             data.setdefault("id", sid)
             host_data = ""
+
             ## 将HostId转为中文
             for host in eval(hostInfo):
                 hostDB = CmdbHost()
@@ -163,18 +171,19 @@ class CmdbUserRightHandler(MixinRequestHandler):
 
             ## 将授权用户组转为中文名字
             role_data = ""
-            for role in eval(roleInfo):
-                req_data = dict(roleId=role)
-                req = httpclient.AsyncRequest(url=GETROLENAME_URI,
-                                              method="get",
-                                              **req_data)
-                yield req.fetch()
-                reps_role_data = req.resp
-                if role_data:
-                    role_data = "{}, {}".format(role_data,
-                                                reps_role_data.get("data"))
-                else:
-                    role_data = reps_role_data.get("data")
+            if roleInfo:
+                for role in eval(roleInfo):
+                    req_data = dict(roleId=role)
+                    req = httpclient.AsyncRequest(url=GETROLENAME_URI,
+                                                  method="get",
+                                                  **req_data)
+                    yield req.fetch()
+                    reps_role_data = req.resp
+                    if role_data:
+                        role_data = "{}, {}".format(role_data,
+                                                    reps_role_data.get("data"))
+                    else:
+                        role_data = reps_role_data.get("data")
             data.setdefault("roleInfo", role_data)
 
             return_data.append(data)
@@ -213,4 +222,21 @@ class userRightIdHandler(MixinRequestHandler):
             self.send_ok(data="")
         else:
             self.send_fail(msg=msg)
+        return
+
+
+@route("/cmdb/userright/uid/{}/hid/{}".format(uuid_re, uuid_re2))
+@route("/cmdb/userright/hostid/{}")
+class userRightUidHandler(MixinRequestHandler):
+    @check_request_permission()
+    def get(self, id, id2=""):
+        """ 根据的用户ID和HOSTID查询可以登陆的服务器用户名"""
+        DB = CmdbUserRight()
+        if not id2:
+            pass
+        msg = DB.getListByUidAndHostId(id2, id)
+        if msg:
+            self.send_ok(data=msg)
+        else:
+            self.send_ok(data=[])
         return

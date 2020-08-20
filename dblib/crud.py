@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-11-20 11:40:07
 @LastEditors: YouShumin
-@LastEditTime: 2020-04-01 18:48:12
+@LastEditTime: 2020-06-11 17:03:33
 @Description: 
 '''
 import datetime
@@ -283,6 +283,14 @@ class CmdbUserRight(MixDbObj):
 
     def getRightHost(self, roleId="", userId=""):
         db_obj = self.db_obj.all()
+
+    def getListByUidAndHostId(self, userId="", hostId=""):
+        userlist = []
+        db_obj = self.db_obj.all()
+        for db in db_obj:
+            if userId in eval(db.userInfo) and hostId in eval(db.hostInfo):
+                userlist.append(db.authUser)
+        return list(set(userlist))
 
 
 class CmdbSysUserAuth(MixDbObj):
