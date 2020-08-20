@@ -4,7 +4,7 @@
 @Author: Youshumin
 @Date: 2019-08-21 11:13:46
 @LastEditors: YouShumin
-@LastEditTime: 2020-04-01 17:08:35
+@LastEditTime: 2020-06-11 16:03:12
 '''
 import logging
 import logging.config
@@ -20,7 +20,6 @@ from configs.setting import (ALLOW_HOST, COOKIE_SECRET, HOST, LOGFILE,
                              MQ_SERVER_ROUTING_KEY, MQ_URL, PORT, PROJECT_NAME)
 from oslo.db.module import mysqlHanlder
 from oslo.task.rabbitmq import TornadoAdapter
-# from task.receive_handler import ReceiveHandle
 from tornado import gen
 from tornado.log import enable_pretty_logging
 from tornado.options import define, options
@@ -34,6 +33,7 @@ class LogHandler(object):
     """设置tornado 日志信息 当设置RUN_ENV为prod的时候进行文件输出,否则控制台
        python3 会有问题... 不是大问题, 不在细化研究...使用supervisor管理python
     """
+
     def __init__(self):
         if debug == "prod":
             define("log_file_prefix", default=LOGFILE)
@@ -57,6 +57,7 @@ if p_version == 2:
 
 class RouteHandler(object):
     """注册路由"""
+
     def __init__(self):
         """
         需要配置这里实现注册路由... 
@@ -74,6 +75,7 @@ class RouteHandler(object):
 
 class DB(object):
     """初始化数据库"""
+
     def __init__(self):
         self.db = mysqlHanlder()
 
@@ -85,6 +87,7 @@ class DB(object):
 
 class Application(tornado.web.Application, RouteHandler):
     """初始化application"""
+
     def __init__(self):
         configs = dict(
             # emplate_path=os.path.join(PATH_APP_ROOT, "templates"),
@@ -100,6 +103,7 @@ class Application(tornado.web.Application, RouteHandler):
 
 class WebApp():
     """应用启动唯一入口"""
+
     def __init__(self):
         """
             初始化启动信息
