@@ -2,16 +2,17 @@
 ### 
 # @Author: Youshumin
 # @Date: 2019-11-15 12:01:01
- # @LastEditors  : YouShumin
- # @LastEditTime : 2020-01-13 02:14:57
+ # @LastEditors: YouShumin
+ # @LastEditTime: 2020-06-10 16:38:23
 # @Description: 
 ###
 
 workdir=$(cd $(dirname $0); pwd) 
 export PYTHONPATH=$PYTHONPATH:${workdir} 
-export RUN_ENV=prod
+export RUN_ENV=test
 pyenv="${workdir}/.env/bin/python"
-
+echo $PYTHONPATH 
+echo $pyenv
 start_main(){
     cd $workdir
     ${pyenv} run_server.py
